@@ -8,7 +8,6 @@ function App() {
   useEffect(() => {
     blogService.getAll().then((initialBlogs) => {
       if (initialBlogs) {
-        console.log(initialBlogs);
         setBlogs(initialBlogs);
       }
     });
