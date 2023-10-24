@@ -1,12 +1,12 @@
-const mongoose = require("mongoose");
 const supertest = require("supertest");
-const app = require("../app");
+const mongoose = require("mongoose");
 const helper = require("./test_helper");
+const app = require("../app");
 const api = supertest(app);
 
 const Blog = require("../models/blog");
 
-beforeAll(async () => {
+beforeEach(async () => {
   await Blog.deleteMany({});
   await Blog.insertMany(helper.initialBlogs);
 });
@@ -57,6 +57,9 @@ test("new blog has the likes field", async () => {
     .expect(201)
     .expect("Content-Type", /application\/json/);
 
+  const blogsAtEnd = await helper.blogsInDb();
+  expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length + 1);
+
   expect(result.body.likes).toBeDefined();
 });
 
@@ -72,6 +75,36 @@ test("new blog has the required fields", async () => {
 
   await api.post("/api/blogs").send(blogWithoutTitle).expect(400);
   await api.post("/api/blogs").send(blogWithoutUrl).expect(400);
+});
+
+test("updating the blog with a valid id", async () => {
+  const blogsAtStart = await helper.blogsInDb();
+  const { id } = blogsAtStart[0];
+  const updatedBlog = { ...blogsAtStart[0], likes: 10 };
+
+  const response = await api
+    .put(`/api/blogs/${id}`)
+    .send(updatedBlog)
+    .expect("Content-Type", /application\/json/);
+
+  expect(response.body).toEqual(updatedBlog);
+});
+
+describe("deletion of the note", () => {
+  test("succeeds with status code 204 if id is valid", async () => {
+    const blogsAtStart = await helper.blogsInDb();
+    const blogToDelete = blogsAtStart[0];
+
+    await api.delete(`/api/blogs/${blogToDelete.id}`).expect(204);
+
+    const blogsAtEnd = await helper.blogsInDb();
+
+    expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length - 1);
+
+    const titles = blogsAtEnd.map((blog) => blog.title);
+
+    expect(titles).not.toContain(blogToDelete.title);
+  });
 });
 
 afterAll(async () => {

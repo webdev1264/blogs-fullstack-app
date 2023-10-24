@@ -1,9 +1,8 @@
 const express = require("express");
 const cors = require("cors");
+const app = express();
 const blogRouter = require("./controllers/blogs");
 const middleware = require("./utils/middleware");
-
-const app = express();
 
 app.use(cors());
 app.use(express.static("dist"));
