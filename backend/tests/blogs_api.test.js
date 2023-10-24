@@ -51,14 +51,13 @@ test("new blog has the likes field", async () => {
     url: "http://blog.cleancoder.com/uncle-bob/2016/05/01/TypeApples.html",
   };
 
-  const res = await api
+  const result = await api
     .post("/api/blogs")
     .send(newBlog)
     .expect(201)
     .expect("Content-Type", /application\/json/);
 
-  const createdBlog = JSON.parse(res.text);
-  expect(createdBlog.likes).toBeDefined();
+  expect(result.body.likes).toBeDefined();
 });
 
 test("new blog has the required fields", async () => {
