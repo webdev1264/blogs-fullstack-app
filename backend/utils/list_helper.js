@@ -8,9 +8,9 @@ const totalLikes = (blogs) => {
 
 const favoriteBlog = (blogs) => {
   let mostLikedBlog = { ...blogs[0] };
-  for (let i = 0; i < blogs.length; i++) {
-    if (blogs[i].likes > mostLikedBlog.likes) {
-      mostLikedBlog = { ...blogs[i] };
+  for (let blog of blogs) {
+    if (blog.likes > mostLikedBlog.likes) {
+      mostLikedBlog = { ...blog };
     }
   }
   const { title, author, likes } = mostLikedBlog;

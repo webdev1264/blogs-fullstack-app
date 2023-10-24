@@ -10,10 +10,10 @@ mongoose
   .catch((e) => logger.info(`Error connecting to MongoDB. Error ${e.message}`));
 
 const blogSchema = mongoose.Schema({
-  title: String,
+  title: { type: String, required: true },
   author: { type: String, required: true, minLength: 2 },
-  url: String,
-  likes: Number,
+  url: { type: String, required: true },
+  likes: { type: Number, default: 0 },
 });
 
 blogSchema.set("toJSON", {
