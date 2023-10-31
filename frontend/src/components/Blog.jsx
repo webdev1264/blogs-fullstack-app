@@ -1,5 +1,5 @@
 const Blog = ({ blog }) => {
-  return <li>{blog.title}</li>;
+  return <li className="blog">{blog.title}</li>;
 };
 
 export default Blog;

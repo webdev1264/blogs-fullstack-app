@@ -39,7 +39,7 @@ blogRouter.delete("/:id", async (req, res, next) => {
 });
 
 blogRouter.post("/", async (req, res, next) => {
-  const { title, author, url, likes } = req.body;
+  const { title, author, url } = req.body;
 
   try {
     if (!req.user) {
@@ -47,7 +47,7 @@ blogRouter.post("/", async (req, res, next) => {
     }
     const user = req.user;
 
-    const blog = new Blog({ title, author, url, likes, user: user.id });
+    const blog = new Blog({ title, author, url, user: user.id });
     const savedBlog = await blog.save();
 
     user.blogs = user.blogs.concat(savedBlog._id);
