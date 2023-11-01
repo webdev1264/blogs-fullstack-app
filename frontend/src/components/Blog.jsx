@@ -1,19 +1,18 @@
 import { useState } from "react";
-import blogService from "../../services/blogs";
 
-const Blog = ({ blog, user, handleAddLike }) => {
+const Blog = ({ blog, handleAddLike, handleDeleteBlog }) => {
   const [visible, setVisible] = useState(false);
 
   const { title, url, likes } = blog;
 
-  const handleLike = async () => {
-    try {
-      const newBlog = { ...blog, likes: blog.likes + 1 };
-      blogService.setToken(user.token);
-      await blogService.like(newBlog);
-      handleAddLike(newBlog);
-    } catch (e) {
-      console.log(`Error: ${e.message}`);
+  const handleLike = () => {
+    handleAddLike(blog);
+  };
+
+  const handleOnDelete = () => {
+    const isDelete = confirm(`Remove blog ${title} by ${blog.user.name}`);
+    if (isDelete) {
+      handleDeleteBlog(blog);
     }
   };
 
@@ -27,6 +26,7 @@ const Blog = ({ blog, user, handleAddLike }) => {
             <span>{likes}</span> <button onClick={handleLike}>like</button>
           </div>
           <div>{blog.user.name}</div>
+          <button onClick={handleOnDelete}>delete</button>
         </>
       ) : (
         title

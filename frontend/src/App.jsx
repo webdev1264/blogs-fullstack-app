@@ -85,7 +85,9 @@ function App() {
     try {
       blogService.setToken(user.token);
       const newBlog = await blogService.create(blogObj);
-      setBlogs([...blogs, newBlog]);
+      const updatedBlogs = [...blogs, newBlog];
+      const sortedBlogs = helper.sortBlogs(updatedBlogs);
+      setBlogs(sortedBlogs);
       showSuccessMessage(newBlog);
       blogFormRef.current.toggleVisible();
     } catch (e) {
@@ -94,14 +96,36 @@ function App() {
     }
   };
 
-  const handleAddLike = (blogObj) => {
-    const updatedBlogs = blogs.map((blog) => {
-      if (blog.id === blogObj.id) {
-        return blogObj;
+  const handleDeleteBlog = async (blogObj) => {
+    try {
+      blogService.setToken(user.token);
+      await blogService.deleteBlog(blogObj);
+      const updatedBlogs = blogs.filter((blog) => blog.id !== blogObj.id);
+      const sortedBlogs = helper.sortBlogs(updatedBlogs);
+      setBlogs(sortedBlogs);
+    } catch (e) {
+      console.log(e.message);
+    }
+  };
+
+  const handleAddLike = async (blogObj) => {
+    try {
+      if (user) {
+        const newBlog = { ...blogObj, likes: blogObj.likes + 1 };
+        blogService.setToken(user.token);
+        const updatedBlog = await blogService.like(newBlog);
+        const updatedBlogs = blogs.map((blog) => {
+          if (blog.id === updatedBlog.id) {
+            return updatedBlog;
+          }
+          return blog;
+        });
+        const sortedBlogs = helper.sortBlogs(updatedBlogs);
+        setBlogs(sortedBlogs);
       }
-      return blog;
-    });
-    setBlogs(updatedBlogs);
+    } catch (e) {
+      console.log(`Error: ${e.message}`);
+    }
   };
 
   const loginForm = () => (
@@ -118,15 +142,27 @@ function App() {
     );
   };
 
+  const content = () => {
+    return (
+      <>
+        <Logout name={user.name} handleLogout={handleLogout} />
+        {blogForm()}
+        <Blogs
+          blogs={blogs}
+          user={user}
+          handleAddLike={handleAddLike}
+          handleDeleteBlog={handleDeleteBlog}
+        />
+      </>
+    );
+  };
+
   return (
     <>
       <h1>Blogs</h1>
       <Notification message={successMessage} className="success" />
       <Notification message={errorMessage} className="error" />
-      {user && <Logout name={user.name} handleLogout={handleLogout} />}
-      {!user && loginForm()}
-      {user && blogForm()}
-      <Blogs blogs={blogs} user={user} handleAddLike={handleAddLike} />
+      {user ? content() : loginForm()}
     </>
   );
 }
