@@ -1,11 +1,11 @@
 #root {
   margin: 0 auto;
   padding: 2rem;
-  text-align: center;
+  /* text-align: center; */
 }
 
 li {
-  list-style: none;
+  text-align: left;
 }
 
 .blog {
@@ -26,4 +26,16 @@ li {
 
 .success {
   color: green;
+}
+
+.input-wrapper {
+  display: flex;
+  justify-content: space-between;
+  margin: 10px 0;
+}
+
+#title,
+#author,
+#url {
+  width: 70%;
 }

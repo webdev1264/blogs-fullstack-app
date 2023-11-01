@@ -1,23 +1,21 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Blogs from "./components/Blogs";
 import Login from "./components/Login";
 import Logout from "./components/Logout";
-import NewBlog from "./components/NewBlog";
+import BlogForm from "./components/BlogForm";
 import Notification from "./components/Notification";
+import Button from "./components/Button";
+import Toggler from "./components/Toggler";
 import blogService from "../services/blogs";
 import loginService from "../services/login";
 import "./App.css";
 
 function App() {
   const [blogs, setBlogs] = useState([]);
-  const [userName, setUserName] = useState("");
-  const [password, setPassword] = useState("");
   const [user, setUser] = useState(null);
-  const [title, setTitle] = useState("");
-  const [author, setAuthor] = useState("");
-  const [url, setUrl] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const blogFormRef = useRef();
 
   useEffect(() => {
     blogService.getAll().then((initialBlogs) => {
@@ -49,16 +47,13 @@ function App() {
     }, 5000);
   };
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
+  const handleLogin = async (userName, password) => {
     try {
       const userData = await loginService.login({ userName, password });
       if (userData) {
         const userDataJSON = JSON.stringify(userData);
         localStorage.setItem("loggedUser", userDataJSON);
         setUser(userData);
-        setUserName("");
-        setPassword("");
       }
     } catch (e) {
       console.log(e);
@@ -68,59 +63,51 @@ function App() {
 
   const handleLogout = () => {
     setUser(null);
+    setLoginVisible(false);
     localStorage.removeItem("loggedUser");
   };
 
-  const handleCreateBlog = async (e) => {
-    e.preventDefault();
+  const handleCreateBlog = async (blogObj) => {
     try {
       blogService.setToken(user.token);
-      const newBlog = await blogService.create({ title, author, url });
+      const newBlog = await blogService.create(blogObj);
       setBlogs([...blogs, newBlog]);
-      setTitle("");
-      setAuthor("");
-      setUrl("");
       showSuccessMessage(newBlog);
+      blogFormRef.current.toggleVisible();
     } catch (e) {
       console.log(e.message);
     }
   };
 
-  if (user === null) {
+  const loginForm = () => (
+    <Toggler buttonLabel="login">
+      <Login handleLogin={handleLogin} />
+    </Toggler>
+  );
+
+  const blogForm = () => {
     return (
-      <>
-        <h1>Login to application</h1>
-        <Notification message={errorMessage} className="error" />
-        <Login
-          handleLogin={handleLogin}
-          userName={userName}
-          password={password}
-          setUserName={setUserName}
-          setPassword={setPassword}
-        />
-      </>
+      <Toggler buttonLabel="create blog" ref={blogFormRef}>
+        <BlogForm handleCreateBlog={handleCreateBlog} />
+      </Toggler>
     );
-  }
+  };
+
+  // const button = () => (
+  //   <Button
+  //     handleLoginVisible={() => setLoginVisible(!loginVisible)}
+  //     name={`${loginVisible ? "cancel" : "login"}`}
+  //   />
+  // );
+
   return (
     <>
-      <h1>List of blogs</h1>
+      <h1>Blogs</h1>
       <Notification message={successMessage} className="success" />
       <Notification message={errorMessage} className="error" />
-      <div>
-        <p>
-          {user.name} <span>logged in</span>{" "}
-          <Logout handleLogout={handleLogout} />
-        </p>
-        <NewBlog
-          handleCreateBlog={handleCreateBlog}
-          title={title}
-          author={author}
-          url={url}
-          setTitle={setTitle}
-          setAuthor={setAuthor}
-          setUrl={setUrl}
-        />
-      </div>
+      {user && <Logout name={user.name} handleLogout={handleLogout} />}
+      {!user && loginForm()}
+      {user && blogForm()}
       <Blogs blogs={blogs} />
     </>
   );
