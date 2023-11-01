@@ -9,8 +9,11 @@ li {
 }
 
 .blog {
-  padding-top: 3px;
-  font-size: 15px;
+  padding-top: 10px;
+  padding-left: 2px;
+  border: 1px solid;
+  border-width: 1px;
+  margin-bottom: 5px;
 }
 
 .error,

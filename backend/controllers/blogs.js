@@ -49,6 +49,10 @@ blogRouter.post("/", async (req, res, next) => {
 
     const blog = new Blog({ title, author, url, user: user.id });
     const savedBlog = await blog.save();
+    await savedBlog.populate("user", {
+      name: 1,
+      userName: 1,
+    });
 
     user.blogs = user.blogs.concat(savedBlog._id);
     await user.save();
@@ -63,12 +67,20 @@ blogRouter.post("/", async (req, res, next) => {
 blogRouter.put("/:id", async (req, res, next) => {
   const id = req.params.id;
   const updatedBlog = req.body;
+  if (!req.user) {
+    return res.status(401).json({ error: "Invalid token" });
+  }
+  const user = req.user;
   try {
-    const returnedBlog = await Blog.findByIdAndUpdate(id, updatedBlog, {
-      new: true,
-      runValidators: true,
-      context: "query",
-    });
+    const returnedBlog = await Blog.findByIdAndUpdate(
+      id,
+      { ...updatedBlog, user: user.id },
+      {
+        new: true,
+        runValidators: true,
+        context: "query",
+      }
+    );
     res.json(returnedBlog);
   } catch (e) {
     next(e);

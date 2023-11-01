@@ -4,10 +4,10 @@ import Login from "./components/Login";
 import Logout from "./components/Logout";
 import BlogForm from "./components/BlogForm";
 import Notification from "./components/Notification";
-import Button from "./components/Button";
 import Toggler from "./components/Toggler";
 import blogService from "../services/blogs";
 import loginService from "../services/login";
+import helper from "../utils/helper";
 import "./App.css";
 
 function App() {
@@ -20,17 +20,31 @@ function App() {
   useEffect(() => {
     blogService.getAll().then((initialBlogs) => {
       if (initialBlogs) {
-        setBlogs(initialBlogs);
+        const sortedBlogs = helper.sortBlogs(initialBlogs);
+        setBlogs(sortedBlogs);
       }
     });
   }, []);
 
   useEffect(() => {
-    const loggedUserJSON = localStorage.getItem("loggedUser");
-    if (loggedUserJSON) {
-      const userData = JSON.parse(loggedUserJSON);
-      setUser(userData);
-    }
+    const fetchData = async () => {
+      try {
+        const loggedUserJSON = localStorage.getItem("loggedUser");
+        if (loggedUserJSON) {
+          const userData = JSON.parse(loggedUserJSON);
+          loginService.setToken(userData.token);
+          const tokenStatus = await loginService.auth();
+          if (tokenStatus === 200) {
+            setUser(userData);
+          }
+        }
+      } catch (e) {
+        console.log(e.message);
+        setUser(null);
+        localStorage.removeItem("loggedUser");
+      }
+    };
+    fetchData();
   }, []);
 
   const showSuccessMessage = (blog) => {
@@ -76,7 +90,18 @@ function App() {
       blogFormRef.current.toggleVisible();
     } catch (e) {
       console.log(e.message);
+      showErrorMessage(e.message);
     }
+  };
+
+  const handleAddLike = (blogObj) => {
+    const updatedBlogs = blogs.map((blog) => {
+      if (blog.id === blogObj.id) {
+        return blogObj;
+      }
+      return blog;
+    });
+    setBlogs(updatedBlogs);
   };
 
   const loginForm = () => (
@@ -93,13 +118,6 @@ function App() {
     );
   };
 
-  // const button = () => (
-  //   <Button
-  //     handleLoginVisible={() => setLoginVisible(!loginVisible)}
-  //     name={`${loginVisible ? "cancel" : "login"}`}
-  //   />
-  // );
-
   return (
     <>
       <h1>Blogs</h1>
@@ -108,7 +126,7 @@ function App() {
       {user && <Logout name={user.name} handleLogout={handleLogout} />}
       {!user && loginForm()}
       {user && blogForm()}
-      <Blogs blogs={blogs} />
+      <Blogs blogs={blogs} user={user} handleAddLike={handleAddLike} />
     </>
   );
 }

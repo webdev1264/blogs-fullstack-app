@@ -29,4 +29,17 @@ loginRouter.post("/", async (req, res, next) => {
   }
 });
 
+loginRouter.get("/", (req, res, next) => {
+  try {
+    const token = req.token;
+    const isTokenValid = jwt.verify(token, process.env.SECRET);
+    if (!isTokenValid) {
+      return res.status(401).json({ error: "invalid token" });
+    }
+    res.status(200).end();
+  } catch (e) {
+    next(e);
+  }
+});
+
 module.exports = loginRouter;
