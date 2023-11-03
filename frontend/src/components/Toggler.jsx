@@ -1,6 +1,7 @@
 import { forwardRef, useImperativeHandle, useState } from "react";
+import PropTypes from "prop-types";
 
-const Toggler = ({ buttonLabel, children }, refs) => {
+const Toggler = forwardRef(({ buttonLabel, children }, refs) => {
   const [visible, setVisible] = useState(false);
 
   const showWhenVisible = { display: visible ? "" : "none" };
@@ -27,6 +28,12 @@ const Toggler = ({ buttonLabel, children }, refs) => {
       </div>
     </div>
   );
+});
+
+Toggler.propTypes = {
+  buttonLabel: PropTypes.string.isRequired,
 };
 
-export default forwardRef(Toggler);
+Toggler.displayName = "Toggler";
+
+export default Toggler;

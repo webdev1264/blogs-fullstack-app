@@ -81,6 +81,11 @@ blogRouter.put("/:id", async (req, res, next) => {
         context: "query",
       }
     );
+    await returnedBlog.populate("user", {
+      name: 1,
+      userName: 1,
+    });
+
     res.json(returnedBlog);
   } catch (e) {
     next(e);

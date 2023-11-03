@@ -77,7 +77,6 @@ function App() {
 
   const handleLogout = () => {
     setUser(null);
-    setLoginVisible(false);
     localStorage.removeItem("loggedUser");
   };
 
