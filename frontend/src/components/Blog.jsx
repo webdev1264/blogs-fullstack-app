@@ -20,12 +20,13 @@ const Blog = ({ blog, handleAddLike, handleDeleteBlog }) => {
     <div className="blog">
       {visible ? (
         <>
-          <div>{title}</div>
-          <div>{url}</div>
+          <div className="title">{title}</div>
+          <div className="url">{url}</div>
           <div>
-            <span>{likes}</span> <button onClick={handleLike}>like</button>
+            <span className="likes">{likes}</span>{" "}
+            <button onClick={handleLike}>like</button>
           </div>
-          <div>{blog.user.name}</div>
+          <div className="user-name">{blog.user.name}</div>
           <button onClick={handleOnDelete}>delete</button>
         </>
       ) : (
